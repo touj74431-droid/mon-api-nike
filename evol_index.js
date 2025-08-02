@@ -1,16 +1,16 @@
-// evol_index.js
+// evol_index.js  (final corrigé)
 import express from 'express';
 import { load } from 'cheerio';
 import https   from 'https';
 
-// Désactivation temporaire du check TLS
+// Désactive la vérification TLS pour Render
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir les fichiers statiques (optionnel)
-app.use(express.static('../site'));
+// Sert le dossier "site" (où se trouve evol_index.html)
+app.use(express.static('site'));
 
 // Helper pour fetch
 function fetchNike(url) {
@@ -23,16 +23,12 @@ function fetchNike(url) {
   });
 }
 
-// Route racine : guide rapide
+// Route racine : redirige vers le site statique
 app.get('/', (_req, res) => {
-  res.json({
-    message: 'API Nike Court Vision Mid – Service live 🚀',
-    usage:   'GET /api/price?q=CU6620-001',
-    example: 'https://mon-api-nike.onrender.com/api/price?q=Dunk%20Low'
-  });
+  res.sendFile('evol_index.html', { root: 'site' });
 });
 
-// Route principale
+// Route API
 app.get('/api/price', async (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q) return res.status(400).json({ error: 'Paramètre q manquant' });
@@ -43,13 +39,11 @@ app.get('/api/price', async (req, res) => {
     let html = await fetchNike(searchUrl);
     let $ = load(html);
 
-    // Sélecteurs Nike actuels
     const href =
       $('a[data-test="product-card__link-overlay"]').first().attr('href') ||
       $('a[href*="/t/"]').first().attr('href');
 
-    if (!href)
-      return res.status(404).json({ error: 'Produit introuvable sur Nike' });
+    if (!href) return res.status(404).json({ error: 'Produit introuvable' });
 
     const url = href.startsWith('http') ? href : `https://www.nike.com${href}`;
     html = await fetchNike(url);
@@ -58,7 +52,6 @@ app.get('/api/price', async (req, res) => {
     const model = $('h1[data-test="product-title"]').text().trim() || $('h1').text().trim();
     const ref   = url.split('/').pop().split('?')[0];
 
-    // Extraction prix
     const txt =
       $('[data-test="product-price"]').text().trim() ||
       $('.current-price').text().trim() ||
@@ -73,5 +66,4 @@ app.get('/api/price', async (req, res) => {
   }
 });
 
-// Lancement
 app.listen(PORT, () => console.log(`✅ Serveur prêt → http://localhost:${PORT}`));
