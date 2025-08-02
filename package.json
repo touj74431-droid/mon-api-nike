@@ -1,8 +1,14 @@
 {
-  "name": "nike-proxy",
+  "name": "mon-api",
+  "version": "1.0.0",
   "type": "module",
+  "main": "evol_index.js",
+  "scripts": {
+    "start": "node evol_index.js"
+  },
   "dependencies": {
+    "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
-    "express": "^4.19.2"
+    "express": "^4.19.0"
   }
 }
