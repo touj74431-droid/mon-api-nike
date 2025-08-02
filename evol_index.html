@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prix Nike – tableau 4 colonnes</title>
+<style>
+  body{font-family:system-ui;background:#f5f5f5;padding:40px;text-align:center}
+  #result{max-width:700px;margin:20px auto}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;box-shadow:0 2px 8px #0001}
+  th,td{padding:12px 8px;text-align:left}
+  th{background:#f2f2f2}
+  a{color:#0066cc;text-decoration:none}
+</style>
+</head>
+<body>
+  <h1>Recherche produit Nike</h1>
+  <input id="q" placeholder="Nom ou SKU (553558-044)" style="padding:8px;width:250px"/>
+  <button onclick="getPrice()">Chercher</button>
+
+  <div id="result" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>Modèle</th>
+          <th>Référence</th>
+          <th>Prix</th>
+          <th>Site</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="model"></td>
+          <td id="ref"></td>
+          <td id="price"></td>
+          <td><a id="site" href="#" target="_blank" rel="noopener">Voir sur Nike</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function getPrice() {
+      const q = document.getElementById('q').value.trim();
+      if (!q) return;
+      document.getElementById('result').style.display = 'none';
+      const res = await fetch(`/api/price?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      if (data.error) { alert(data.error); return; }
+      document.getElementById('model').textContent = data.model;
+      document.getElementById('ref').textContent   = data.ref;
+      document.getElementById('price').textContent = data.price;
+      document.getElementById('site').href         = data.url;
+      document.getElementById('result').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
